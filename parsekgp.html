@@ -1,0 +1,106 @@
+<script type="text/x-red" data-template-name="parsekgp">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-port"><i class="fa fa-empire"></i> Port</label>
+        <input type="text" id="node-input-port" placeholder="port">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-tasks"></i> Format</label>
+		<input type="hidden" id="node-input-format" autofocus="autofocus">
+    </div>
+	<div class="form-row node-text-editor-row">
+		<div style="height: 150px; min-height: 100px;" class="node-text-editor" id="node-input-format-editor">
+	</div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('parsekgp',{
+        category: 'function',
+        color: '#E2D96E',
+		defaults: {
+            name: {value:""},
+            port: {value:"",required:true},
+            format: {value:"",required:true},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "split.png",
+        label: function() {
+            return this.name||"Parse Payload";
+        },
+		oneditprepare: function() {
+            var that = this;
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-format-editor',
+                mode: 'ace/mode/javascript',
+                value: $("#node-input-format").val(),
+                globals: {
+                    msg:true,
+                    context:true,
+                    RED: true,
+                    util: true,
+                    flow: true,
+                    global: true,
+                    console: true,
+                    Buffer: true,
+                    setTimeout: true,
+                    clearTimeout: true,
+                    setInterval: true,
+                    clearInterval: true
+                }
+            });
+
+            RED.library.create({
+                url:"functions", // where to get the data from
+                type:"parsekgp", // the type of object the library is for
+                editor:this.editor, // the field name the main text body goes to
+                mode:"ace/mode/javascript",
+                fields:['name','outputs']
+            });
+            this.editor.focus();
+        },
+        oneditsave: function() {
+            $("#node-input-format").val(this.editor.getValue());
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0; i<rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
+        }
+    });
+</script>
+
+<script type="text/x-red" data-help-name="parsekgp">
+    <p>Parse KashiwaGeeks Payload</p>
+	<p Payload is a bitstream consist from 1bit-bool and 4bits, 1byte, 2bytes, 4bytes integer or unsinged integer and 4bytes float. This node parse the payload and extract values and return the array of values.</p>
+<h3>Details</h3>
+<p>Format are:</p>
+<ul>
+  <li><code>bool();</code></li>
+  <li><code>uint4();</code></li>
+  <li><code>uint8();</code></li>
+  <li><code>uint16();</code></li>
+  <li><code>uint32);</code></li>
+  <li><code>int4();</code></li>
+  <li><code>int8();</code></li>
+  <li><code>int16();</code></li>
+  <li><code>int32();</code></li>
+  <li><code>float();</code></li> 
+</ul>
+
+</script>
