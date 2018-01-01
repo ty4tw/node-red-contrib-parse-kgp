@@ -136,6 +136,18 @@ module.exports = function(RED)
 			array.push(data.readFloatBE(0));
 		}
 
+		function string()
+		{
+			var data = getData(4);
+			var len = data.readUInt8(0);
+			var buf = Buffer.alloc(15, 0);
+			for ( var i = 0; i < len; i++ )
+			{
+				buf[i] = getData(8);
+			}
+			array.push(buf.toString('utf-8', 0, len);
+		}
+
 		var s = "function parsePayload(){" + this.format + "}";
 		eval(s);
 
