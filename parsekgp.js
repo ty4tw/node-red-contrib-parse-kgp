@@ -132,7 +132,6 @@ module.exports = function(RED)
 		function float()
 		{
 			var data = getData(32);
-			//msg.payload = data;
 			array.push(data.readFloatBE(0));
 		}
 
@@ -140,12 +139,12 @@ module.exports = function(RED)
 		{
 			var data = getData(4);
 			var len = data.readUInt8(0);
-			var buf = Buffer.alloc(15, 0);
+			var val = Buffer.alloc(15, 0);
 			for ( var i = 0; i < len; i++ )
 			{
-				buf[i] = getData(8);
+				val[i] = getBits(8);
 			}
-			array.push(buf.toString('utf-8', 0, len));
+			array.push(val.toString('utf-8', 0, len));
 		}
 
 		var s = "function parsePayload(){" + this.format + "}";
@@ -170,7 +169,6 @@ module.exports = function(RED)
 				    var vhex = String(data[i]) + String(data[i+1]);
 				    udata.writeUInt8(parseInt(vhex, 16), j++);
 				}
-
 
 				array = [];
 				parsePayload();
