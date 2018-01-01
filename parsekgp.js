@@ -145,7 +145,7 @@ module.exports = function(RED)
 			{
 				buf[i] = getData(8);
 			}
-			array.push(buf.toString('utf-8', 0, len);
+			array.push(buf.toString('utf-8', 0, len));
 		}
 
 		var s = "function parsePayload(){" + this.format + "}";
