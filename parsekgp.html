@@ -7,101 +7,103 @@
         <label for="node-input-port"><i class="fa fa-empire"></i> Port</label>
         <input type="text" id="node-input-port" placeholder="port">
     </div>
-    <div class="form-row">
-        <label for="node-input-format"><i class="fa fa-tasks"></i> Format</label>
-		<input type="hidden" id="node-input-format" autofocus="autofocus">
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> Format</span></label>
     </div>
-	<div class="form-row node-text-editor-row">
-		<div style="height: 150px; min-height: 100px;" class="node-text-editor" id="node-input-format-editor">
-	</div>
+    <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+    </div>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('parsekgp',{
+    RED.nodes.registerType('parsekgp', {
+        color: "#E2D96E",
         category: 'function',
-        color: '#E2D96E',
-		defaults: {
+        defaults: {
             name: {value:""},
-            port: {value:"",required:true},
-            format: {value:"",required:true},
+			port: {value:"", required:true},
+            formats:{value:[""], required:true}     
         },
-        inputs:1,
-        outputs:1,
-        icon: "split.png",
+        inputs: 1,
+        outputs: 1,
+        icon: "swap.png",
         label: function() {
             return this.name||"Parse Payload";
         },
-		oneditprepare: function() {
-            var that = this;
-            this.editor = RED.editor.createEditor({
-                id: 'node-input-format-editor',
-                mode: 'ace/mode/javascript',
-                value: $("#node-input-format").val(),
-                globals: {
-                    msg:true,
-                    context:true,
-                    RED: true,
-                    util: true,
-                    flow: true,
-                    global: true,
-                    console: true,
-                    Buffer: true,
-                    setTimeout: true,
-                    clearTimeout: true,
-                    setInterval: true,
-                    clearInterval: true
-                }
+        oneditprepare: function() {
+            $('#node-input-rule-container').css('min-height','300px').css('min-width','450px').editableList({
+                addItem: function(container,i,opt) {
+                    var format = opt;
+					if (!format.hasOwnProperty('l')) {
+                        format = {v:"bool();", l:"bool"};
+                    }
+                    var row1 = $('<div/>').appendTo(container);
+
+					var selectField = $('<select style="width:30%;">').appendTo(row1);   
+					var selectOptions = [{v:"bool();",l:"bool"},{v:"uint4();",l:"uint4"},{v:"uint8();",l:"uint8"},{v:"uint16();",l:"uint16"},{v:"uint32();",l:"uint32"},{v:"int4();",l:"int4"},{v:"int8();",l:"int8"},{v:"int16();",l:"int16"},{v:"int32();",l:"int32"},{v:"float();",l:"float"},{v:"string();",l:"string"}];
+
+                    for (var i=0; i<selectOptions.length; i++) {
+                        selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
+                    }
+
+/*
+                    selectField.change(function() {
+                        var width = $("#node-input-rule-container").width();
+                    });
+*/
+                    selectField.val(format.l);
+                    selectField.change();
+                    var newWidth = $("#node-input-rule-container").width();
+                },
+                removable: true,
+                sortable: true
             });
 
-            RED.library.create({
-                url:"functions", // where to get the data from
-                type:"parsekgp", // the type of object the library is for
-                editor:this.editor, // the field name the main text body goes to
-                mode:"ace/mode/javascript",
-                fields:['name','outputs']
-            });
-            this.editor.focus();
-        },
+
+            for (var i=0; i<this.formats.length; i++) {
+                var format = this.formats[i];
+                $("#node-input-rule-container").editableList('addItem',format);
+            }
+
+			if (!this.formats) {
+                var format = {v:"bool();", l:"bool"};
+				this.formats = [format];
+            }
+		},
+		
+
         oneditsave: function() {
-            $("#node-input-format").val(this.editor.getValue());
-            this.editor.destroy();
-            delete this.editor;
+            var formats = $("#node-input-rule-container").editableList('items');
+            var node = this;
+            node.formats = [];
+            formats.each(function() {
+                var format = $(this);
+                var type = format.find("select").val();
+                var r = {l:type};
+                node.formats.push(r);
+            }); 
         },
-        oneditcancel: function() {
-            this.editor.destroy();
-            delete this.editor;
-        },
+ 
         oneditresize: function(size) {
-            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-            var height = $("#dialog-form").height();
+            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+            var height = size.height;
             for (var i=0; i<rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
-            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
             height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-            $(".node-text-editor").css("height",height+"px");
-            this.editor.resize();
+
+            $("#node-input-rule-container").editableList('height',height);
         }
-    });
+	});
+
 </script>
 
 <script type="text/x-red" data-help-name="parsekgp">
     <p>Parse KashiwaGeeks Payload</p>
-	<p Payload is a bitstream consist from 1bit-bool and 4bits, 1byte, 2bytes, 4bytes integer or unsinged integer and 4bytes float. This node parse the payload and extract values and return the array of values.</p>
+	<p> Payload is a bitstream consist from 1bit-bool and 4bits, 1byte, 2bytes, 4bytes integer or unsinged integer and 4bytes float. This node parses the payload and return the array of values.</p>
 <h3>Details</h3>
-<p>Format are:</p>
-<ul>
-  <li><code>bool();</code></li>
-  <li><code>uint4();</code></li>
-  <li><code>uint8();</code></li>
-  <li><code>uint16();</code></li>
-  <li><code>uint32);</code></li>
-  <li><code>int4();</code></li>
-  <li><code>int8();</code></li>
-  <li><code>int16();</code></li>
-  <li><code>int32();</code></li>
-  <li><code>float();</code></li> 
-  <li><code>string();</code></li> 
-</ul>
+<p>Add a selector and select a format of Payload</p>
+
 
 </script>
