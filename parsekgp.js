@@ -5,7 +5,7 @@ module.exports = function(RED)
         RED.nodes.createNode(this,n);
         var node = this;
 		this.portNo = n.port;
-		this.format = n.format;
+		this.formats = n.formats;
 		var Gpos = 0;
 		var gPos = 7;
 		var array = [];
@@ -147,7 +147,6 @@ module.exports = function(RED)
 			array.push(val.toString('utf-8', 0, len));
 		}
 
-		
 		var code = "";
 		for ( var i = 0; i < this.formats.length; i++ )
 		{
