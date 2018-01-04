@@ -5,8 +5,7 @@ module.exports = function(RED)
         RED.nodes.createNode(this,n);
         var node = this;
 		this.portNo = n.port;
-		this.formats = n.formats;
-
+		this.format = n.format;
 		var Gpos = 0;
 		var gPos = 7;
 		var array = [];
@@ -148,6 +147,7 @@ module.exports = function(RED)
 			array.push(val.toString('utf-8', 0, len));
 		}
 
+		
 		var code = "";
 		for ( var i = 0; i < this.formats.length; i++ )
 		{
@@ -178,7 +178,8 @@ module.exports = function(RED)
 
 				array = [];
 				parsePayload();
-				msg.payload = array; 
+				
+		  		msg.payload = array; 
           		node.send(msg);
 			}
         });
