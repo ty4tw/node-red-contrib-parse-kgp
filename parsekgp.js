@@ -176,6 +176,8 @@ module.exports = function(RED)
 				}
 
 				array = [];
+				array.push(msg.payload[2]);
+				array.push(msg.payload[3]);
 				parsePayload();
 				
 		  		msg.payload = array; 
